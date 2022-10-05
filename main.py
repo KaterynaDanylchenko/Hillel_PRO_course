@@ -29,17 +29,30 @@ def parse(query: str) -> dict:
     assert parse('https://example.com/path/to/&name=ferret&') == {'name': 'ferret'}
     assert parse('https://example.com/path/to/name=Dima age=28 city=Kiev') == {'name': 'Dima', 'age': '28', 'city': 'Kiev'}
 
-
-
-
-
+    
 
 def parse_cookie(query: str) -> dict:
-    return {}
+    replace_str = query.replace(';', ' ')
+    lst_to_compare = replace_str.split()
+    dict_final = {}
+    for i in lst_to_compare:
+        position_of_equality_symbol = i.find('=')
+        key = i[0:position_of_equality_symbol]
+        value = (i[position_of_equality_symbol + 1:])
+        dict_final[key] = value
+    return dict_final
 
-
-if __name__ == '__main__':
     assert parse_cookie('name=Dima;') == {'name': 'Dima'}
     assert parse_cookie('') == {}
     assert parse_cookie('name=Dima;age=28;') == {'name': 'Dima', 'age': '28'}
     assert parse_cookie('name=Dima=User;age=28;') == {'name': 'Dima=User', 'age': '28'}
+    assert parse_cookie('name=Dima=User') == {'name': 'Dima=User'}
+    assert parse_cookie(';name=Dima=User') == {'name': 'Dima=User'}
+    assert parse_cookie(';name=Dima&') == {'name': 'Dima=User'}
+    assert parse_cookie(';name=124356') == {'name': '124356'}
+    assert parse_cookie('name=124356;age= ') == {'name': '124356', 'age': ''}
+    assert parse_cookie('name=124356% age=full=15') == {'name': '124356%', 'age': 'full=15'}
+    assert parse_cookie('name=[Kateryna] age=full=15') == {'name': '[Kateryna]', 'age': 'full=15'}
+    assert parse_cookie('name="Katya";age=full=15') == {'name': '"Katya"', 'age': 'full=15'}
+    assert parse_cookie('=Dima;age=28') == {'': 'Dima', 'age': '28'}
+    assert parse_cookie('=Dima age=28') == {'': 'Dima', 'age': '28'}
